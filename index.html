@@ -374,7 +374,7 @@
                 
                 <div class="input-wrapper">
                     <label for="dateSigned">Date</label>
-                    <input type="date" id="dateSigned" name="Date Signed" required>
+                    <input type="date" id="dateSigned" name="Date Signed" required readonly>
                     <div class="error-message">Date is required.</div>
                 </div>
             </div>
@@ -407,6 +407,14 @@
         
         const addMoreJobsCheckbox = document.getElementById('add-more-jobs-checkbox');
         const additionalJobsContainer = document.getElementById('additional-jobs');
+
+        // Set signature date to today
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('dateSigned').value = `${yyyy}-${mm}-${dd}`;
+
 
         // Signature Pad Logic
         const ctx = signaturePadCanvas.getContext('2d');
@@ -548,93 +556,160 @@
 
         function generateAndDownloadPDF() {
             const doc = new jsPDF();
-            let yPos = 20;
+            let y = 20;
             const leftMargin = 15;
             const rightMargin = 195;
+            const col2_x = 110;
             const lineSpacing = 7;
-            const sectionSpacing = 12;
+            const sectionSpacing = 10;
 
             // PDF Header
             const logoImg = document.getElementById('logo');
             try {
-                 doc.addImage(logoImg, 'PNG', leftMargin, 10, 50, 25);
+                 doc.addImage(logoImg, 'PNG', leftMargin, 10, 40, 20);
             } catch(e) {
                 console.error("Error adding logo image to PDF:", e);
             }
            
             doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
-            doc.text('Employment Application', 105, 25, { align: 'center' });
+            doc.text('Employment Application', rightMargin, 25, { align: 'right' });
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.text('Underpressure Inc.', 105, 32, { align: 'center' });
-            yPos = 50;
+            doc.text('Underpressure Inc.', rightMargin, 32, { align: 'right' });
+            y = 50;
 
             const addSectionHeader = (title) => {
-                 if (yPos > 250) { doc.addPage(); yPos = 20; }
-                 doc.setLineWidth(0.5);
-                 doc.line(leftMargin, yPos, rightMargin, yPos);
-                 yPos += sectionSpacing / 2;
+                 if (y > 250) { doc.addPage(); y = 20; }
                  doc.setFontSize(14);
                  doc.setFont('helvetica', 'bold');
-                 doc.text(title, leftMargin, yPos);
-                 yPos += lineSpacing * 1.5;
-                 doc.setFontSize(10);
+                 doc.text(title, leftMargin, y);
+                 y += 4;
+                 doc.setLineWidth(0.5);
+                 doc.line(leftMargin, y, rightMargin, y);
+                 y += lineSpacing * 1.5;
+            };
+
+            const addFullWidthField = (label, value) => {
+                if (!value) return;
+                if (y > 270) { doc.addPage(); y = 20; }
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${label}:`, leftMargin, y);
+                doc.setFont('helvetica', 'normal');
+                const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin);
+                doc.text(textLines, leftMargin, y + 5);
+                y += (textLines.length * lineSpacing) + 8;
             };
             
-            const addField = (label, value) => {
-                if (value) {
-                    if (yPos > 270) { doc.addPage(); yPos = 20; }
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${label}:`, leftMargin, yPos);
-                    doc.setFont('helvetica', 'normal');
-                    const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin - 45);
-                    doc.text(textLines, leftMargin + 45, yPos);
-                    yPos += (textLines.length * lineSpacing);
-                }
-            };
-            
-            const sections = form.querySelectorAll('.form-section');
-            sections.forEach(section => {
-                const title = section.querySelector('h2').textContent;
+            const processSection = (sectionElement) => {
+                const title = sectionElement.querySelector('h2').textContent;
                 addSectionHeader(title);
                 
-                const inputs = section.querySelectorAll('input:not([type=checkbox]), textarea');
-                inputs.forEach(input => {
-                    if (!input.disabled && input.value) {
-                         addField(input.name, input.value);
+                const wrappers = sectionElement.querySelectorAll('.input-wrapper, .input-group');
+                wrappers.forEach(wrapper => {
+                    const inputs = wrapper.querySelectorAll('input:not([type=checkbox]), textarea');
+                    const radios = wrapper.querySelectorAll('input[type=radio]:checked');
+                    
+                    if (inputs.length === 1 && !radios.length) { // Full width field
+                        const input = inputs[0];
+                        if (!input.disabled && input.value) {
+                             addFullWidthField(input.labels[0].textContent, input.value);
+                        }
+                    } else if (inputs.length > 1) { // Two-column fields
+                        const label1 = inputs[0].labels[0].textContent;
+                        const value1 = inputs[0].value;
+                        const label2 = inputs[1].labels[0].textContent;
+                        const value2 = inputs[1].value;
+
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.setFontSize(10);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${label1}:`, leftMargin, y);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(String(value1), leftMargin + 35, y);
+
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${label2}:`, col2_x, y);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(String(value2), col2_x + 35, y);
+                        y += lineSpacing;
+
+                    } else if (radios.length > 0) { // Radio button group
+                        const label = wrapper.querySelector('label').textContent;
+                        const value = wrapper.querySelector('input[type=radio]:checked').value;
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.setFontSize(10);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(label, leftMargin, y);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(value, leftMargin + doc.getTextWidth(label) + 2, y);
+                        y += lineSpacing;
                     }
                 });
 
-                const radios = section.querySelectorAll('input[type=radio]:checked');
-                radios.forEach(radio => {
-                     if (!radio.disabled) {
-                         addField(radio.name, radio.value);
-                     }
-                });
-            });
+                // Process h4 sub-headers for references and jobs
+                const subHeaders = sectionElement.querySelectorAll('h4');
+                subHeaders.forEach(h4 => {
+                    y += 4;
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(h4.textContent, leftMargin, y);
+                    y += lineSpacing;
+                    
+                    let jobEntry = h4.closest('.job-entry');
+                    if (!jobEntry) jobEntry = h4.nextElementSibling; // For references
 
+                    const jobWrappers = jobEntry.querySelectorAll('.input-wrapper, .input-group');
+                     jobWrappers.forEach(wrapper => {
+                        const inputs = wrapper.querySelectorAll('input:not([type=checkbox]), textarea');
+                        if (inputs.length === 1) {
+                           if (!inputs[0].disabled && inputs[0].value) addFullWidthField(inputs[0].labels[0].textContent, inputs[0].value);
+                        } else if (inputs.length > 1) {
+                           const label1 = inputs[0].labels[0].textContent;
+                           const value1 = inputs[0].value;
+                           const label2 = inputs[1].labels[0].textContent;
+                           const value2 = inputs[1].value;
+                           if (y > 270) { doc.addPage(); y = 20; }
+                           doc.setFontSize(10);
+                           doc.setFont('helvetica', 'bold');
+                           doc.text(`${label1}:`, leftMargin, y);
+                           doc.setFont('helvetica', 'normal');
+                           doc.text(String(value1), leftMargin + 35, y);
+                           doc.setFont('helvetica', 'bold');
+                           doc.text(`${label2}:`, col2_x, y);
+                           doc.setFont('helvetica', 'normal');
+                           doc.text(String(value2), col2_x + 35, y);
+                           y += lineSpacing;
+                        }
+                    });
+                });
+            };
+            
+            const sections = form.querySelectorAll('.form-section');
+            sections.forEach(processSection);
 
             // Signature & Consent
-            addSectionHeader("Signature & Consent");
+            const signatureSection = form.querySelector('#signature-pad').closest('.form-section');
+            addSectionHeader(signatureSection.querySelector('h2').textContent);
             doc.setFont('helvetica', 'normal');
-            const consentText = "My signature certifies that the information provided is true and complete. I understand that Underpressure Inc reserves the right to perform a background check and that employment may be subject to random drug testing.";
+            const consentText = signatureSection.querySelector('p').textContent;
             const splitConsent = doc.splitTextToSize(consentText, rightMargin - leftMargin);
-            doc.text(splitConsent, leftMargin, yPos);
-            yPos += (splitConsent.length * lineSpacing) + 5;
+            doc.text(splitConsent, leftMargin, y);
+            y += (splitConsent.length * lineSpacing) + 5;
 
             const signatureImage = signatureDataInput.value;
             if (signatureImage) {
-                doc.addImage(signatureImage, 'PNG', leftMargin, yPos, 60, 30);
+                doc.addImage(signatureImage, 'PNG', leftMargin, y, 60, 30);
             }
             doc.setLineWidth(0.5);
-            doc.line(leftMargin, yPos + 30, leftMargin + 70, yPos + 30);
-            doc.text("Signature", leftMargin + 5, yPos + 35);
+            doc.line(leftMargin, y + 30, leftMargin + 70, y + 30);
+            doc.text("Signature", leftMargin + 5, y + 35);
 
             const dateSigned = document.getElementById('dateSigned').value;
-            doc.text(`Date: ${dateSigned}`, leftMargin + 100, yPos + 25);
-            doc.line(leftMargin + 95, yPos + 30, leftMargin + 150, yPos + 30);
-            doc.text("Date", leftMargin + 100, yPos + 35);
+            doc.text(`Date: ${dateSigned}`, col2_x, y + 25);
+            doc.line(col2_x - 5, y + 30, col2_x + 50, y + 30);
+            doc.text("Date", col2_x, y + 35);
             
             // Save the PDF
             const applicantName = document.getElementById('fullName').value.replace(/ /g, '_');
