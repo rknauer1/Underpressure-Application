@@ -385,7 +385,7 @@
         <div id="success-message" class="hidden-section">
             <h2>Thank You!</h2>
             <p>Your application PDF has been successfully generated and downloaded.</p>
-            <p>Please attach the downloaded file to an email and send it to:</p>
+            <p>Please attach the downloaded file to an e-mail and send it to:</p>
             <p><strong>service@underpressure-inc.com</strong></p>
         </div>
     </div>
@@ -583,7 +583,7 @@
             y += lineSpacing;
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.text('Underpressure Inc.', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
+            doc.text('Underpressure Inc', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
             y += sectionSpacing * 1.5;
 
             const checkPageBreak = (spaceNeeded = 20) => {
