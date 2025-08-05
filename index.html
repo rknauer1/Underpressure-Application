@@ -160,7 +160,7 @@
 
     <div class="container">
         <header>
-            <img id="logo" src="logo.png" alt="Underpressure Inc Logo">
+            <img id="logo" src="logo.png" alt="Underpressure Inc Logo" style="display:none;">
             <h1>Underpressure Inc</h1>
             <p>Employment Application</p>
         </header>
@@ -168,7 +168,7 @@
         <form id="applicationForm" novalidate>
             
             <!-- Personal Information -->
-            <div class="form-section">
+            <div class="form-section" data-section-title="Personal Information">
                 <h2>Personal Information</h2>
                 <div class="input-group">
                     <div class="input-wrapper">
@@ -208,7 +208,7 @@
             </div>
 
             <!-- Driving Record -->
-            <div class="form-section">
+            <div class="form-section" data-section-title="Driving Record">
                 <h2>Driving Record</h2>
                  <div class="input-wrapper">
                     <label>Do you have a current, valid driver's license?</label>
@@ -252,7 +252,7 @@
             </div>
 
             <!-- References -->
-            <div class="form-section">
+            <div class="form-section" data-section-title="References">
                 <h2>References</h2>
                 <p>Please list two references other than relatives.</p>
                 <h4>Reference 1</h4>
@@ -270,7 +270,7 @@
             </div>
 
             <!-- Work Experience -->
-            <div class="form-section">
+            <div class="form-section" data-section-title="Work Experience">
                 <h2>Work Experience</h2>
                 <div class="checkbox-group">
                     <label><input type="checkbox" id="no-experience-checkbox"> I have no previous work experience.</label>
@@ -352,7 +352,7 @@
             </div>
 
             <!-- Additional Information -->
-            <div class="form-section">
+            <div class="form-section" data-section-title="Additional Information">
                 <h2>Additional Information</h2>
                 <div class="input-wrapper">
                     <label for="additionalInfo">Is there any other information you would like us to consider? (e.g., skills, certifications) (Optional)</label>
@@ -361,7 +361,7 @@
             </div>
 
             <!-- Signature and Consent -->
-            <div class="form-section">
+            <div class="form-section" data-section-title="Signature & Consent">
                 <h2>Signature & Consent</h2>
                 <p>My signature below certifies that the information provided is true and complete. I understand that Underpressure Inc reserves the right to perform a background check and that employment may be subject to random drug testing.</p>
                 <div class="input-wrapper">
@@ -566,18 +566,25 @@
             // PDF Header
             const logoImg = document.getElementById('logo');
             try {
-                 doc.addImage(logoImg, 'PNG', leftMargin, 10, 40, 20);
+                const logoWidth = 40;
+                // Calculate aspect ratio to prevent distortion
+                const logoAspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
+                const logoHeight = logoWidth / logoAspectRatio;
+                const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
+                doc.addImage(logoImg, 'PNG', logoX, 10, logoWidth, logoHeight);
             } catch(e) {
                 console.error("Error adding logo image to PDF:", e);
             }
            
+            y = 50; // Set y position after logo
             doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
-            doc.text('Employment Application', rightMargin, 25, { align: 'right' });
+            doc.text('Employment Application', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
+            y += lineSpacing;
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.text('Underpressure Inc.', rightMargin, 32, { align: 'right' });
-            y = 50;
+            doc.text('Underpressure Inc.', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
+            y += sectionSpacing * 1.5;
 
             const addSectionHeader = (title) => {
                  if (y > 250) { doc.addPage(); y = 20; }
@@ -597,58 +604,68 @@
                 doc.setFont('helvetica', 'bold');
                 doc.text(`${label}:`, leftMargin, y);
                 doc.setFont('helvetica', 'normal');
-                const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin);
+                const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin - 5);
                 doc.text(textLines, leftMargin, y + 5);
                 y += (textLines.length * lineSpacing) + 8;
             };
             
+            const addTwoColumnFields = (label1, value1, label2, value2) => {
+                if (!value1 && !value2) return;
+                 if (y > 270) { doc.addPage(); y = 20; }
+                doc.setFontSize(10);
+
+                // Column 1
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${label1}:`, leftMargin, y);
+                doc.setFont('helvetica', 'normal');
+                doc.text(String(value1 || 'N/A'), leftMargin + 35, y);
+
+                // Column 2
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${label2}:`, col2_x, y);
+                doc.setFont('helvetica', 'normal');
+                doc.text(String(value2 || 'N/A'), col2_x + 35, y);
+                y += lineSpacing;
+            }
+            
+            const addRadioField = (label, value) => {
+                if (!value) return;
+                if (y > 270) { doc.addPage(); y = 20; }
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, leftMargin, y);
+                doc.setFont('helvetica', 'normal');
+                doc.text(value, leftMargin + doc.getTextWidth(label) + 3, y);
+                y += lineSpacing;
+            }
+
             const processSection = (sectionElement) => {
-                const title = sectionElement.querySelector('h2').textContent;
+                const title = sectionElement.dataset.sectionTitle;
                 addSectionHeader(title);
                 
                 const wrappers = sectionElement.querySelectorAll('.input-wrapper, .input-group');
+                
                 wrappers.forEach(wrapper => {
                     const inputs = wrapper.querySelectorAll('input:not([type=checkbox]), textarea');
                     const radios = wrapper.querySelectorAll('input[type=radio]:checked');
                     
-                    if (inputs.length === 1 && !radios.length) { // Full width field
+                    if (inputs.length === 1 && !radios.length) {
                         const input = inputs[0];
                         if (!input.disabled && input.value) {
                              addFullWidthField(input.labels[0].textContent, input.value);
                         }
-                    } else if (inputs.length > 1) { // Two-column fields
-                        const label1 = inputs[0].labels[0].textContent;
-                        const value1 = inputs[0].value;
-                        const label2 = inputs[1].labels[0].textContent;
-                        const value2 = inputs[1].value;
-
-                        if (y > 270) { doc.addPage(); y = 20; }
-                        doc.setFontSize(10);
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(`${label1}:`, leftMargin, y);
-                        doc.setFont('helvetica', 'normal');
-                        doc.text(String(value1), leftMargin + 35, y);
-
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(`${label2}:`, col2_x, y);
-                        doc.setFont('helvetica', 'normal');
-                        doc.text(String(value2), col2_x + 35, y);
-                        y += lineSpacing;
-
-                    } else if (radios.length > 0) { // Radio button group
+                    } else if (inputs.length > 1) {
+                        addTwoColumnFields(
+                            inputs[0].labels[0].textContent, inputs[0].value,
+                            inputs[1].labels[0].textContent, inputs[1].value
+                        );
+                    } else if (radios.length > 0) {
                         const label = wrapper.querySelector('label').textContent;
                         const value = wrapper.querySelector('input[type=radio]:checked').value;
-                        if (y > 270) { doc.addPage(); y = 20; }
-                        doc.setFontSize(10);
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(label, leftMargin, y);
-                        doc.setFont('helvetica', 'normal');
-                        doc.text(value, leftMargin + doc.getTextWidth(label) + 2, y);
-                        y += lineSpacing;
+                        addRadioField(label, value);
                     }
                 });
 
-                // Process h4 sub-headers for references and jobs
                 const subHeaders = sectionElement.querySelectorAll('h4');
                 subHeaders.forEach(h4 => {
                     y += 4;
@@ -658,7 +675,7 @@
                     y += lineSpacing;
                     
                     let jobEntry = h4.closest('.job-entry');
-                    if (!jobEntry) jobEntry = h4.nextElementSibling; // For references
+                    if (!jobEntry) jobEntry = h4.nextElementSibling;
 
                     const jobWrappers = jobEntry.querySelectorAll('.input-wrapper, .input-group');
                      jobWrappers.forEach(wrapper => {
@@ -666,24 +683,14 @@
                         if (inputs.length === 1) {
                            if (!inputs[0].disabled && inputs[0].value) addFullWidthField(inputs[0].labels[0].textContent, inputs[0].value);
                         } else if (inputs.length > 1) {
-                           const label1 = inputs[0].labels[0].textContent;
-                           const value1 = inputs[0].value;
-                           const label2 = inputs[1].labels[0].textContent;
-                           const value2 = inputs[1].value;
-                           if (y > 270) { doc.addPage(); y = 20; }
-                           doc.setFontSize(10);
-                           doc.setFont('helvetica', 'bold');
-                           doc.text(`${label1}:`, leftMargin, y);
-                           doc.setFont('helvetica', 'normal');
-                           doc.text(String(value1), leftMargin + 35, y);
-                           doc.setFont('helvetica', 'bold');
-                           doc.text(`${label2}:`, col2_x, y);
-                           doc.setFont('helvetica', 'normal');
-                           doc.text(String(value2), col2_x + 35, y);
-                           y += lineSpacing;
+                           addTwoColumnFields(
+                                inputs[0].labels[0].textContent, inputs[0].value,
+                                inputs[1].labels[0].textContent, inputs[1].value
+                            );
                         }
                     });
                 });
+                 y += sectionSpacing; // Add space after each section
             };
             
             const sections = form.querySelectorAll('.form-section');
@@ -691,7 +698,8 @@
 
             // Signature & Consent
             const signatureSection = form.querySelector('#signature-pad').closest('.form-section');
-            addSectionHeader(signatureSection.querySelector('h2').textContent);
+            addSectionHeader(signatureSection.dataset.sectionTitle);
+            doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             const consentText = signatureSection.querySelector('p').textContent;
             const splitConsent = doc.splitTextToSize(consentText, rightMargin - leftMargin);
