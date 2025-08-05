@@ -168,7 +168,7 @@
         <form id="applicationForm" novalidate>
             
             <!-- Personal Information -->
-            <div class="form-section" data-section-title="Personal Information">
+            <div class="form-section">
                 <h2>Personal Information</h2>
                 <div class="input-group">
                     <div class="input-wrapper">
@@ -208,7 +208,7 @@
             </div>
 
             <!-- Driving Record -->
-            <div class="form-section" data-section-title="Driving Record">
+            <div class="form-section">
                 <h2>Driving Record</h2>
                  <div class="input-wrapper">
                     <label>Do you have a current, valid driver's license?</label>
@@ -252,7 +252,7 @@
             </div>
 
             <!-- References -->
-            <div class="form-section" data-section-title="References">
+            <div class="form-section">
                 <h2>References</h2>
                 <p>Please list two references other than relatives.</p>
                 <h4>Reference 1</h4>
@@ -270,7 +270,7 @@
             </div>
 
             <!-- Work Experience -->
-            <div class="form-section" data-section-title="Work Experience">
+            <div class="form-section">
                 <h2>Work Experience</h2>
                 <div class="checkbox-group">
                     <label><input type="checkbox" id="no-experience-checkbox"> I have no previous work experience.</label>
@@ -352,7 +352,7 @@
             </div>
 
             <!-- Additional Information -->
-            <div class="form-section" data-section-title="Additional Information">
+            <div class="form-section">
                 <h2>Additional Information</h2>
                 <div class="input-wrapper">
                     <label for="additionalInfo">Is there any other information you would like us to consider? (e.g., skills, certifications) (Optional)</label>
@@ -361,7 +361,7 @@
             </div>
 
             <!-- Signature and Consent -->
-            <div class="form-section" data-section-title="Signature & Consent">
+            <div class="form-section">
                 <h2>Signature & Consent</h2>
                 <p>My signature below certifies that the information provided is true and complete. I understand that Underpressure Inc reserves the right to perform a background check and that employment may be subject to random drug testing.</p>
                 <div class="input-wrapper">
@@ -562,12 +562,12 @@
             const col2_x = 110;
             const lineSpacing = 7;
             const sectionSpacing = 10;
+            const pageHeight = doc.internal.pageSize.getHeight();
 
             // PDF Header
             const logoImg = document.getElementById('logo');
             try {
                 const logoWidth = 40;
-                // Calculate aspect ratio to prevent distortion
                 const logoAspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
                 const logoHeight = logoWidth / logoAspectRatio;
                 const logoX = (doc.internal.pageSize.getWidth() - logoWidth) / 2;
@@ -576,7 +576,7 @@
                 console.error("Error adding logo image to PDF:", e);
             }
            
-            y = 50; // Set y position after logo
+            y = 45;
             doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
             doc.text('Employment Application', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
@@ -586,8 +586,15 @@
             doc.text('Underpressure Inc.', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
             y += sectionSpacing * 1.5;
 
+            const checkPageBreak = () => {
+                if (y > pageHeight - 20) {
+                    doc.addPage();
+                    y = 20;
+                }
+            };
+
             const addSectionHeader = (title) => {
-                 if (y > 250) { doc.addPage(); y = 20; }
+                 checkPageBreak();
                  doc.setFontSize(14);
                  doc.setFont('helvetica', 'bold');
                  doc.text(title, leftMargin, y);
@@ -599,38 +606,38 @@
 
             const addFullWidthField = (label, value) => {
                 if (!value) return;
-                if (y > 270) { doc.addPage(); y = 20; }
+                checkPageBreak();
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'bold');
                 doc.text(`${label}:`, leftMargin, y);
                 doc.setFont('helvetica', 'normal');
                 const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin - 5);
                 doc.text(textLines, leftMargin, y + 5);
-                y += (textLines.length * lineSpacing) + 8;
+                y += (textLines.length * 5) + 8;
             };
             
             const addTwoColumnFields = (label1, value1, label2, value2) => {
                 if (!value1 && !value2) return;
-                 if (y > 270) { doc.addPage(); y = 20; }
+                checkPageBreak();
                 doc.setFontSize(10);
 
-                // Column 1
                 doc.setFont('helvetica', 'bold');
                 doc.text(`${label1}:`, leftMargin, y);
                 doc.setFont('helvetica', 'normal');
                 doc.text(String(value1 || 'N/A'), leftMargin + 35, y);
 
-                // Column 2
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${label2}:`, col2_x, y);
-                doc.setFont('helvetica', 'normal');
-                doc.text(String(value2 || 'N/A'), col2_x + 35, y);
+                if (label2) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${label2}:`, col2_x, y);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(String(value2 || 'N/A'), col2_x + 35, y);
+                }
                 y += lineSpacing;
             }
             
             const addRadioField = (label, value) => {
                 if (!value) return;
-                if (y > 270) { doc.addPage(); y = 20; }
+                checkPageBreak();
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'bold');
                 doc.text(label, leftMargin, y);
@@ -639,72 +646,91 @@
                 y += lineSpacing;
             }
 
-            const processSection = (sectionElement) => {
-                const title = sectionElement.dataset.sectionTitle;
-                addSectionHeader(title);
-                
-                const wrappers = sectionElement.querySelectorAll('.input-wrapper, .input-group');
-                
-                wrappers.forEach(wrapper => {
-                    const inputs = wrapper.querySelectorAll('input:not([type=checkbox]), textarea');
-                    const radios = wrapper.querySelectorAll('input[type=radio]:checked');
-                    
-                    if (inputs.length === 1 && !radios.length) {
-                        const input = inputs[0];
-                        if (!input.disabled && input.value) {
-                             addFullWidthField(input.labels[0].textContent, input.value);
-                        }
-                    } else if (inputs.length > 1) {
-                        addTwoColumnFields(
-                            inputs[0].labels[0].textContent, inputs[0].value,
-                            inputs[1].labels[0].textContent, inputs[1].value
-                        );
-                    } else if (radios.length > 0) {
-                        const label = wrapper.querySelector('label').textContent;
-                        const value = wrapper.querySelector('input[type=radio]:checked').value;
-                        addRadioField(label, value);
+            const getInputValue = (id) => document.getElementById(id)?.value || '';
+            const getRadioValue = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+
+            // --- Build PDF Content ---
+
+            addSectionHeader("Personal Information");
+            addTwoColumnFields("Full Name", getInputValue('fullName'), "Date of Birth", getInputValue('dob'));
+            addFullWidthField("Present Address", getInputValue('presentAddress'));
+            addTwoColumnFields("Home Phone", getInputValue('homePhone'), "Cell Phone", getInputValue('cellPhone'));
+            addFullWidthField("Email Address", getInputValue('email'));
+            y += sectionSpacing;
+
+            addSectionHeader("Driving Record");
+            addRadioField("Has valid driver's license?", getRadioValue("Has valid driver's license?"));
+            addTwoColumnFields("License Number", getInputValue('licenseNumber'), "State of Issue", getInputValue('licenseState'));
+            addRadioField("Is license REAL ID compliant?", getRadioValue("Is license REAL ID compliant?"));
+            addRadioField("Moving Violations (past 3 yrs)?", getRadioValue("Moving Violations"));
+            addRadioField("Accidents (past 3 yrs)?", getRadioValue("Accidents"));
+            y += sectionSpacing;
+
+            addSectionHeader("References");
+            doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text("Reference 1", leftMargin, y); y += lineSpacing;
+            addTwoColumnFields("Name", getInputValue('ref1Name'), "Relation", getInputValue('ref1Relation'));
+            addFullWidthField("Telephone", getInputValue('ref1Telephone'));
+            y += 5;
+            doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text("Reference 2", leftMargin, y); y += lineSpacing;
+            addTwoColumnFields("Name", getInputValue('ref2Name'), "Relation", getInputValue('ref2Relation'));
+            addFullWidthField("Telephone", getInputValue('ref2Telephone'));
+            y += sectionSpacing;
+
+            if (!noExperienceCheckbox.checked) {
+                addSectionHeader("Work Experience");
+                // Job 1
+                doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text("Most Recent Job", leftMargin, y); y += lineSpacing;
+                addFullWidthField("Employer Name", getInputValue('employer1Name'));
+                addFullWidthField("Address", getInputValue('employer1Address'));
+                addTwoColumnFields("Supervisor", getInputValue('employer1Supervisor'), "Supervisor Phone", getInputValue('employer1SupervisorPhone'));
+                addFullWidthField("Supervisor Email", getInputValue('employer1SupervisorEmail'));
+                addTwoColumnFields("From", getInputValue('employer1DatesFrom'), "To", getInputValue('employer1DatesTo'));
+                addTwoColumnFields("Starting Salary", getInputValue('employer1PayStart'), "Final Salary", getInputValue('employer1PayFinal'));
+                addFullWidthField("Reason for Leaving", getInputValue('employer1LeavingReason'));
+                addFullWidthField("Duties", getInputValue('employer1Duties'));
+                y += 5;
+
+                if (addMoreJobsCheckbox.checked) {
+                    // Job 2
+                    if (getInputValue('employer2Name')) {
+                        doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text("Previous Job", leftMargin, y); y += lineSpacing;
+                        addFullWidthField("Employer Name", getInputValue('employer2Name'));
+                        addFullWidthField("Address", getInputValue('employer2Address'));
+                        addTwoColumnFields("Supervisor", getInputValue('employer2Supervisor'), "Supervisor Phone", getInputValue('employer2SupervisorPhone'));
+                        addFullWidthField("Supervisor Email", getInputValue('employer2SupervisorEmail'));
+                        addTwoColumnFields("From", getInputValue('employer2DatesFrom'), "To", getInputValue('employer2DatesTo'));
+                        addTwoColumnFields("Starting Salary", getInputValue('employer2PayStart'), "Final Salary", getInputValue('employer2PayFinal'));
+                        addFullWidthField("Reason for Leaving", getInputValue('employer2LeavingReason'));
+                        addFullWidthField("Duties", getInputValue('employer2Duties'));
+                        y += 5;
                     }
-                });
+                    // Job 3
+                    if (getInputValue('employer3Name')) {
+                        doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text("Previous Job", leftMargin, y); y += lineSpacing;
+                        addFullWidthField("Employer Name", getInputValue('employer3Name'));
+                        addFullWidthField("Address", getInputValue('employer3Address'));
+                        addTwoColumnFields("Supervisor", getInputValue('employer3Supervisor'), "Supervisor Phone", getInputValue('employer3SupervisorPhone'));
+                        addFullWidthField("Supervisor Email", getInputValue('employer3SupervisorEmail'));
+                        addTwoColumnFields("From", getInputValue('employer3DatesFrom'), "To", getInputValue('employer3DatesTo'));
+                        addTwoColumnFields("Starting Salary", getInputValue('employer3PayStart'), "Final Salary", getInputValue('employer3PayFinal'));
+                        addFullWidthField("Reason for Leaving", getInputValue('employer3LeavingReason'));
+                        addFullWidthField("Duties", getInputValue('employer3Duties'));
+                    }
+                }
+            }
+            y += sectionSpacing;
 
-                const subHeaders = sectionElement.querySelectorAll('h4');
-                subHeaders.forEach(h4 => {
-                    y += 4;
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(h4.textContent, leftMargin, y);
-                    y += lineSpacing;
-                    
-                    let jobEntry = h4.closest('.job-entry');
-                    if (!jobEntry) jobEntry = h4.nextElementSibling;
+            addSectionHeader("Additional Information");
+            addFullWidthField("", getInputValue('additionalInfo'));
+            y += sectionSpacing;
 
-                    const jobWrappers = jobEntry.querySelectorAll('.input-wrapper, .input-group');
-                     jobWrappers.forEach(wrapper => {
-                        const inputs = wrapper.querySelectorAll('input:not([type=checkbox]), textarea');
-                        if (inputs.length === 1) {
-                           if (!inputs[0].disabled && inputs[0].value) addFullWidthField(inputs[0].labels[0].textContent, inputs[0].value);
-                        } else if (inputs.length > 1) {
-                           addTwoColumnFields(
-                                inputs[0].labels[0].textContent, inputs[0].value,
-                                inputs[1].labels[0].textContent, inputs[1].value
-                            );
-                        }
-                    });
-                });
-                 y += sectionSpacing; // Add space after each section
-            };
-            
-            const sections = form.querySelectorAll('.form-section');
-            sections.forEach(processSection);
-
-            // Signature & Consent
-            const signatureSection = form.querySelector('#signature-pad').closest('.form-section');
-            addSectionHeader(signatureSection.dataset.sectionTitle);
+            addSectionHeader("Signature & Consent");
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            const consentText = signatureSection.querySelector('p').textContent;
+            const consentText = "My signature below certifies that the information provided is true and complete. I understand that Underpressure Inc reserves the right to perform a background check and that employment may be subject to random drug testing.";
             const splitConsent = doc.splitTextToSize(consentText, rightMargin - leftMargin);
             doc.text(splitConsent, leftMargin, y);
-            y += (splitConsent.length * lineSpacing) + 5;
+            y += (splitConsent.length * 5) + 10;
 
             const signatureImage = signatureDataInput.value;
             if (signatureImage) {
