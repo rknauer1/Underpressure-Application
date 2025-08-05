@@ -144,6 +144,16 @@
         .hidden-section {
             display: none;
         }
+        #success-message {
+            text-align: center;
+            padding: 40px 20px;
+            border: 2px dashed #3498db;
+            border-radius: 12px;
+            background-color: #f0f8ff;
+        }
+        #success-message h2 {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -167,9 +177,9 @@
                         <div class="error-message">Full name is required.</div>
                     </div>
                      <div class="input-wrapper">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="Email Address" pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}" title="Enter a valid email address" required>
-                        <div class="error-message">Please enter a valid email address (e.g., name@example.com).</div>
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" name="Date of Birth" required>
+                        <div class="error-message">A valid date of birth is required.</div>
                     </div>
                 </div>
                 <div class="input-wrapper">
@@ -191,11 +201,9 @@
                     </div>
                 </div>
                  <div class="input-wrapper">
-                    <label>Are you 18 years of age or older?</label>
-                     <div class="radio-group">
-                        <label><input type="radio" name="Are you 18 or older?" value="Yes" required> Yes</label>
-                        <label><input type="radio" name="Are you 18 or older?" value="No"> No</label>
-                    </div>
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="Email Address" pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}" title="Enter a valid email address" required>
+                    <div class="error-message">Please enter a valid email address (e.g., name@example.com).</div>
                 </div>
             </div>
 
@@ -225,6 +233,20 @@
                         <label><input type="radio" name="Is license REAL ID compliant?" value="Yes"> Yes</label>
                         <label><input type="radio" name="Is license REAL ID compliant?" value="No"> No</label>
                         <label><input type="radio" name="Is license REAL ID compliant?" value="Unsure"> Unsure</label>
+                    </div>
+                </div>
+                 <div class="input-wrapper">
+                    <label>Have you had any moving violations within the past three years?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="Moving Violations" value="Yes"> Yes</label>
+                        <label><input type="radio" name="Moving Violations" value="No"> No</label>
+                    </div>
+                </div>
+                 <div class="input-wrapper">
+                    <label>Have you had any accidents within the past three years?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="Accidents" value="Yes"> Yes</label>
+                        <label><input type="radio" name="Accidents" value="No"> No</label>
                     </div>
                 </div>
             </div>
@@ -258,11 +280,13 @@
                     <!-- Job 1 -->
                     <div class="job-entry">
                         <h4>Most Recent Job</h4>
-                        <div class="input-group">
-                            <div class="input-wrapper"><label for="employer1Name">Employer Name</label><input type="text" id="employer1Name" name="Job 1: Employer Name" class="work-exp-field" required><div class="error-message">Employer name is required.</div></div>
-                            <div class="input-wrapper"><label for="employer1Phone">Phone</label><input type="tel" id="employer1Phone" name="Job 1: Employer Phone" class="work-exp-field" pattern="(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{10})" required><div class="error-message">A valid phone number is required.</div></div>
-                        </div>
+                        <div class="input-wrapper"><label for="employer1Name">Employer Name</label><input type="text" id="employer1Name" name="Job 1: Employer Name" class="work-exp-field" required><div class="error-message">Employer name is required.</div></div>
                         <div class="input-wrapper"><label for="employer1Address">Address</label><input type="text" id="employer1Address" name="Job 1: Employer Address" class="work-exp-field" minlength="10" required><div class="error-message">A complete address is required.</div></div>
+                        <div class="input-group">
+                            <div class="input-wrapper"><label for="employer1Supervisor">Supervisor</label><input type="text" id="employer1Supervisor" name="Job 1: Supervisor" class="work-exp-field" required><div class="error-message">Supervisor name is required.</div></div>
+                            <div class="input-wrapper"><label for="employer1SupervisorPhone">Supervisor Phone</label><input type="tel" id="employer1SupervisorPhone" name="Job 1: Supervisor Phone" class="work-exp-field" pattern="(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{10})" required><div class="error-message">A valid phone number is required.</div></div>
+                        </div>
+                        <div class="input-wrapper"><label for="employer1SupervisorEmail">Supervisor Email</label><input type="email" id="employer1SupervisorEmail" name="Job 1: Supervisor Email" class="work-exp-field" pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}" required><div class="error-message">A valid email is required.</div></div>
                         <div class="input-group">
                             <div class="input-wrapper"><label for="employer1DatesFrom">From</label><input type="date" id="employer1DatesFrom" name="Job 1: From Date" class="work-exp-field" required><div class="error-message">Start date is required.</div></div>
                             <div class="input-wrapper"><label for="employer1DatesTo">To</label><input type="date" id="employer1DatesTo" name="Job 1: To Date" class="work-exp-field" required><div class="error-message">End date is required.</div></div>
@@ -284,11 +308,13 @@
                         <!-- Job 2 -->
                         <div class="job-entry">
                             <h4>Previous Job</h4>
-                            <div class="input-group">
-                                <div class="input-wrapper"><label for="employer2Name">Employer Name</label><input type="text" id="employer2Name" name="Job 2: Employer Name" class="work-exp-field-addl"><div class="error-message">Employer name is required.</div></div>
-                                <div class="input-wrapper"><label for="employer2Phone">Phone</label><input type="tel" id="employer2Phone" name="Job 2: Employer Phone" class="work-exp-field-addl" pattern="(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{10})"><div class="error-message">A valid phone number is required.</div></div>
-                            </div>
+                            <div class="input-wrapper"><label for="employer2Name">Employer Name</label><input type="text" id="employer2Name" name="Job 2: Employer Name" class="work-exp-field-addl"><div class="error-message">Employer name is required.</div></div>
                             <div class="input-wrapper"><label for="employer2Address">Address</label><input type="text" id="employer2Address" name="Job 2: Employer Address" class="work-exp-field-addl" minlength="10"><div class="error-message">A complete address is required.</div></div>
+                            <div class="input-group">
+                                <div class="input-wrapper"><label for="employer2Supervisor">Supervisor</label><input type="text" id="employer2Supervisor" name="Job 2: Supervisor" class="work-exp-field-addl"><div class="error-message">Supervisor name is required.</div></div>
+                                <div class="input-wrapper"><label for="employer2SupervisorPhone">Supervisor Phone</label><input type="tel" id="employer2SupervisorPhone" name="Job 2: Supervisor Phone" class="work-exp-field-addl" pattern="(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{10})"><div class="error-message">A valid phone number is required.</div></div>
+                            </div>
+                            <div class="input-wrapper"><label for="employer2SupervisorEmail">Supervisor Email</label><input type="email" id="employer2SupervisorEmail" name="Job 2: Supervisor Email" class="work-exp-field-addl" pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}" ><div class="error-message">A valid email is required.</div></div>
                             <div class="input-group">
                                 <div class="input-wrapper"><label for="employer2DatesFrom">From</label><input type="date" id="employer2DatesFrom" name="Job 2: From Date" class="work-exp-field-addl"><div class="error-message">Start date is required.</div></div>
                                 <div class="input-wrapper"><label for="employer2DatesTo">To</label><input type="date" id="employer2DatesTo" name="Job 2: To Date" class="work-exp-field-addl"><div class="error-message">End date is required.</div></div>
@@ -303,11 +329,13 @@
                         <!-- Job 3 -->
                         <div class="job-entry">
                             <h4>Previous Job</h4>
-                            <div class="input-group">
-                                <div class="input-wrapper"><label for="employer3Name">Employer Name</label><input type="text" id="employer3Name" name="Job 3: Employer Name" class="work-exp-field-addl"><div class="error-message">Employer name is required.</div></div>
-                                <div class="input-wrapper"><label for="employer3Phone">Phone</label><input type="tel" id="employer3Phone" name="Job 3: Employer Phone" class="work-exp-field-addl" pattern="(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{10})"><div class="error-message">A valid phone number is required.</div></div>
-                            </div>
+                             <div class="input-wrapper"><label for="employer3Name">Employer Name</label><input type="text" id="employer3Name" name="Job 3: Employer Name" class="work-exp-field-addl"><div class="error-message">Employer name is required.</div></div>
                             <div class="input-wrapper"><label for="employer3Address">Address</label><input type="text" id="employer3Address" name="Job 3: Employer Address" class="work-exp-field-addl" minlength="10"><div class="error-message">A complete address is required.</div></div>
+                            <div class="input-group">
+                                <div class="input-wrapper"><label for="employer3Supervisor">Supervisor</label><input type="text" id="employer3Supervisor" name="Job 3: Supervisor" class="work-exp-field-addl"><div class="error-message">Supervisor name is required.</div></div>
+                                <div class="input-wrapper"><label for="employer3SupervisorPhone">Supervisor Phone</label><input type="tel" id="employer3SupervisorPhone" name="Job 3: Supervisor Phone" class="work-exp-field-addl" pattern="(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{10})"><div class="error-message">A valid phone number is required.</div></div>
+                            </div>
+                            <div class="input-wrapper"><label for="employer3SupervisorEmail">Supervisor Email</label><input type="email" id="employer3SupervisorEmail" name="Job 3: Supervisor Email" class="work-exp-field-addl" pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}" ><div class="error-message">A valid email is required.</div></div>
                             <div class="input-group">
                                 <div class="input-wrapper"><label for="employer3DatesFrom">From</label><input type="date" id="employer3DatesFrom" name="Job 3: From Date" class="work-exp-field-addl"><div class="error-message">Start date is required.</div></div>
                                 <div class="input-wrapper"><label for="employer3DatesTo">To</label><input type="date" id="employer3DatesTo" name="Job 3: To Date" class="work-exp-field-addl"><div class="error-message">End date is required.</div></div>
@@ -351,8 +379,15 @@
                 </div>
             </div>
 
-            <button type="submit">Generate and Download Application PDF</button>
+            <button type="submit">Generate and Download Application</button>
         </form>
+
+        <div id="success-message" class="hidden-section">
+            <h2>Thank You!</h2>
+            <p>Your application PDF has been successfully generated and downloaded.</p>
+            <p>Please attach the downloaded file to an email and send it to:</p>
+            <p><strong>service@underpressure-inc.com</strong></p>
+        </div>
     </div>
 
     <script>
@@ -361,6 +396,7 @@
         window.jsPDF = window.jspdf.jsPDF;
 
         const form = document.getElementById('applicationForm');
+        const successMessage = document.getElementById('success-message');
         const signaturePadCanvas = document.getElementById('signature-pad');
         const signatureDataInput = document.getElementById('signature-data');
         const clearButton = document.getElementById('clear-signature');
@@ -506,23 +542,26 @@
                     alert('Please correct the errors in the highlighted fields before submitting.');
                 }
             } else {
-                generatePDF();
+                generateAndDownloadPDF();
             }
         });
 
-        function generatePDF() {
+        function generateAndDownloadPDF() {
             const doc = new jsPDF();
-            const formData = new FormData(form);
-            const data = {};
-            let yPos = 20; // Initial Y position
+            let yPos = 20;
             const leftMargin = 15;
             const rightMargin = 195;
             const lineSpacing = 7;
             const sectionSpacing = 12;
 
-            // --- PDF Header ---
+            // PDF Header
             const logoImg = document.getElementById('logo');
-            doc.addImage(logoImg, 'PNG', leftMargin, 10, 50, 25);
+            try {
+                 doc.addImage(logoImg, 'PNG', leftMargin, 10, 50, 25);
+            } catch(e) {
+                console.error("Error adding logo image to PDF:", e);
+            }
+           
             doc.setFontSize(22);
             doc.setFont('helvetica', 'bold');
             doc.text('Employment Application', 105, 25, { align: 'center' });
@@ -531,21 +570,10 @@
             doc.text('Underpressure Inc.', 105, 32, { align: 'center' });
             yPos = 50;
 
-            // --- Helper function to add fields ---
-            const addField = (label, value) => {
-                if (value) {
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${label}:`, leftMargin, yPos);
-                    doc.setFont('helvetica', 'normal');
-                    const textLines = doc.splitTextToSize(value, rightMargin - leftMargin - 25);
-                    doc.text(textLines, leftMargin + 40, yPos);
-                    yPos += (textLines.length * lineSpacing);
-                }
-            };
-            
             const addSectionHeader = (title) => {
+                 if (yPos > 250) { doc.addPage(); yPos = 20; }
                  doc.setLineWidth(0.5);
-                 doc.line(leftMargin, yPos, rightMargin - leftMargin + 15, yPos);
+                 doc.line(leftMargin, yPos, rightMargin, yPos);
                  yPos += sectionSpacing / 2;
                  doc.setFontSize(14);
                  doc.setFont('helvetica', 'bold');
@@ -553,44 +581,41 @@
                  yPos += lineSpacing * 1.5;
                  doc.setFontSize(10);
             };
-
-            // --- Collect and process data ---
-             const formElements = form.elements;
-             const applicationData = [];
-             let currentSection = "";
-
-             for (const element of formElements) {
-                if(element.tagName === 'H2') {
-                    currentSection = element.textContent;
+            
+            const addField = (label, value) => {
+                if (value) {
+                    if (yPos > 270) { doc.addPage(); yPos = 20; }
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${label}:`, leftMargin, yPos);
+                    doc.setFont('helvetica', 'normal');
+                    const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin - 45);
+                    doc.text(textLines, leftMargin + 45, yPos);
+                    yPos += (textLines.length * lineSpacing);
                 }
-                 if (element.name && !element.disabled) {
-                     let value;
-                     if (element.type === 'radio') {
-                         if (element.checked) {
-                             value = element.value;
-                             applicationData.push({ section: currentSection, label: element.name, value: value });
-                         }
-                     } else if (element.type !== 'submit' && element.type !== 'button' && element.id !== 'signature-data') {
-                         value = element.value;
-                         applicationData.push({ section: currentSection, label: element.name, value: value });
-                     }
-                 }
-             }
-
-            // --- Build PDF ---
-            let printedSections = {};
-            applicationData.forEach(item => {
-                if (item.value) {
-                    const sectionTitle = item.section || "General Information";
-                    if (!printedSections[sectionTitle]) {
-                        addSectionHeader(sectionTitle);
-                        printedSections[sectionTitle] = true;
+            };
+            
+            const sections = form.querySelectorAll('.form-section');
+            sections.forEach(section => {
+                const title = section.querySelector('h2').textContent;
+                addSectionHeader(title);
+                
+                const inputs = section.querySelectorAll('input:not([type=checkbox]), textarea');
+                inputs.forEach(input => {
+                    if (!input.disabled && input.value) {
+                         addField(input.name, input.value);
                     }
-                    addField(item.label, item.value);
-                }
+                });
+
+                const radios = section.querySelectorAll('input[type=radio]:checked');
+                radios.forEach(radio => {
+                     if (!radio.disabled) {
+                         addField(radio.name, radio.value);
+                     }
+                });
             });
 
-            // --- Add Signature ---
+
+            // Signature & Consent
             addSectionHeader("Signature & Consent");
             doc.setFont('helvetica', 'normal');
             const consentText = "My signature certifies that the information provided is true and complete. I understand that Underpressure Inc reserves the right to perform a background check and that employment may be subject to random drug testing.";
@@ -611,9 +636,13 @@
             doc.line(leftMargin + 95, yPos + 30, leftMargin + 150, yPos + 30);
             doc.text("Date", leftMargin + 100, yPos + 35);
             
-            // --- Save PDF ---
+            // Save the PDF
             const applicantName = document.getElementById('fullName').value.replace(/ /g, '_');
             doc.save(`Application-${applicantName || 'Applicant'}.pdf`);
+
+            // Show success message
+            form.style.display = 'none';
+            successMessage.classList.remove('hidden-section');
         }
         
         form.querySelectorAll('input:not([type=hidden]), textarea').forEach(field => {
