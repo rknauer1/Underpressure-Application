@@ -160,7 +160,7 @@
 
     <div class="container">
         <header>
-            <img id="logo" src="logo.png" alt="Underpressure Inc Logo" style="display:none;">
+            <img id="logo" src="logo.png" alt="Underpressure Inc Logo">
             <h1>Underpressure Inc</h1>
             <p>Employment Application</p>
         </header>
@@ -586,15 +586,15 @@
             doc.text('Underpressure Inc.', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
             y += sectionSpacing * 1.5;
 
-            const checkPageBreak = () => {
-                if (y > pageHeight - 20) {
+            const checkPageBreak = (spaceNeeded = 20) => {
+                if (y > pageHeight - spaceNeeded) {
                     doc.addPage();
                     y = 20;
                 }
             };
 
             const addSectionHeader = (title) => {
-                 checkPageBreak();
+                 checkPageBreak(30); // Need more space for a header
                  doc.setFontSize(14);
                  doc.setFont('helvetica', 'bold');
                  doc.text(title, leftMargin, y);
@@ -606,14 +606,15 @@
 
             const addFullWidthField = (label, value) => {
                 if (!value) return;
-                checkPageBreak();
+                const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin - 5);
+                const fieldHeight = (textLines.length * 5) + 8;
+                checkPageBreak(fieldHeight);
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'bold');
                 doc.text(`${label}:`, leftMargin, y);
                 doc.setFont('helvetica', 'normal');
-                const textLines = doc.splitTextToSize(String(value), rightMargin - leftMargin - 5);
                 doc.text(textLines, leftMargin, y + 5);
-                y += (textLines.length * 5) + 8;
+                y += fieldHeight;
             };
             
             const addTwoColumnFields = (label1, value1, label2, value2) => {
@@ -740,8 +741,15 @@
             doc.line(leftMargin, y + 30, leftMargin + 70, y + 30);
             doc.text("Signature", leftMargin + 5, y + 35);
 
-            const dateSigned = document.getElementById('dateSigned').value;
-            doc.text(`Date: ${dateSigned}`, col2_x, y + 25);
+            const dateSignedValue = document.getElementById('dateSigned').value;
+            // Add timezone offset to prevent date from shifting
+            const date = new Date(dateSignedValue + 'T00:00:00');
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            doc.text(formattedDate, col2_x, y + 25);
             doc.line(col2_x - 5, y + 30, col2_x + 50, y + 30);
             doc.text("Date", col2_x, y + 35);
             
